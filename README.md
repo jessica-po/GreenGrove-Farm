@@ -1,5 +1,7 @@
 # GreenGrove Dashboard Frontend
 
+![image](https://github.com/user-attachments/assets/fc656abc-6f49-46c8-842c-1f40ad8abd0e)
+
 A modern, responsive dashboard for the GreenGrove sustainability platform built with React and Material-UI.
 
 ## 🌱 Project Overview
