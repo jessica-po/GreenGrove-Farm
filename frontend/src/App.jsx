@@ -1,29 +1,45 @@
-
-import CssBaseline from '@mui/material/CssBaseline';
+import { Box } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Sidebar from './components/Sidebar';
 import NavBar from './components/NavBar';
 import AccountManagement from './components/AccountManagement';
+
 const drawerWidth = 240;
 
 export default function App() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <CssBaseline />
-      <div style={{ flex: '0 0 64px', }}> {/* Navigation along the top */}
-        <AppBar position="static">
+    <Box sx={{ 
+      display: 'flex', 
+      minHeight: '100vh',
+    }}>
+      {/* Sidebar */}
+      <Sidebar drawerWidth={drawerWidth} />
+      
+      {/* Main content wrapper */}
+      <Box sx={{ 
+        flexGrow: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+      }}>
+        {/* AppBar */}
+        <AppBar 
+          position="fixed" 
+        >
           <NavBar />
         </AppBar>
-      </div>
-      <div style={{ display: 'flex', flex: '1' }}> {/* Main container for sidebar and content */}
-        <div style={{ flex: `0 0 ${drawerWidth}px` }}> {/* Sidebar on the left */}
-          <Sidebar />
-        </div>
-        <div style={{ flex: '1', padding: '16px', overflowY: 'auto' }}> {/* Main content here */}
-          {/* Main content goes here */}
+
+        {/* Main content area with proper spacing from AppBar */}
+        <Box component="main" sx={{ 
+          flexGrow: 1,
+          p: 3,
+          mt: '64px', // Height of AppBar
+          width: '100%',
+          overflow: 'auto'
+        }}>
           <AccountManagement />
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 }

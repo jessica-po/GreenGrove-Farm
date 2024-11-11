@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline';
 import './index.css'
 import App from './App.jsx'
 
@@ -30,9 +31,32 @@ const theme = createTheme({
     },
     background: {
       default: '#f5f5f5',
+      paper: '#ffffff',
     },
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          backgroundColor: '#f5f5f5',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
+        contained: {
+          backgroundColor: '#b6de3d',
+          boxShadow: 'none',
+          '&:hover': {
+            backgroundColor: '#96b42d',
+            boxShadow: 'none',
+          },
+        },
+      },
+    },
     MuiListItemButton: {
       styleOverrides: {
         root: {
@@ -107,6 +131,7 @@ const theme = createTheme({
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <App />
     </ThemeProvider>
   </StrictMode>,
