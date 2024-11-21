@@ -16,6 +16,9 @@ import {
   LinearProgress,
 } from '@mui/material';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import StarIcon from '@mui/icons-material/Star';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { format } from 'date-fns';
 import { useUser } from '../hooks/useUser';
 import { rewardsService } from '../services/supabaseService';
@@ -86,32 +89,156 @@ export default function RewardsComponent() {
         </Box>
 
         <Box sx={{ mb: 4 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-            <Typography variant="subtitle1">
-              Available Points: {rewardsData?.totalPoints || 0}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Chip
-                label={`Earned: ${rewardsData?.totalPointsEarned || 0}`}
-                color="success"
-                variant="outlined"
-              />
-              <Chip
-                label={`Redeemed: ${rewardsData?.totalPointsRedeemed || 0}`}
-                color="primary"
-                variant="outlined"
-              />
-            </Box>
+          <Box 
+            sx={{ 
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' },
+              gap: 3,
+              mb: 3
+            }}
+          >
+            {/* Available Points Card */}
+            <Paper 
+              elevation={2} 
+              sx={{ 
+                p: 3,
+                background: 'linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)',
+                border: '1px solid',
+                borderColor: 'grey.200',
+                borderRadius: 2,
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+            >
+              <Box sx={{ position: 'relative', zIndex: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <StarIcon sx={{ 
+                    fontSize: 40, 
+                    color: 'primary.main',
+                    opacity: 0.8,
+                    mr: 1
+                  }} />
+                  <Typography variant="h6" color="text.secondary">
+                    Available Points
+                  </Typography>
+                </Box>
+                <Typography variant="h3" color="text.primary" sx={{ fontWeight: 'bold' }}>
+                  {rewardsData?.totalPoints || 0}
+                </Typography>
+              </Box>
+              <Box sx={{
+                position: 'absolute',
+                right: -20,
+                bottom: -20,
+                width: '150px',
+                height: '150px',
+                borderRadius: '50%',
+                background: 'primary.light',
+                opacity: 0.1
+              }} />
+            </Paper>
+
+            {/* Total Earned Card */}
+            <Paper 
+              elevation={2}
+              sx={{ 
+                p: 3,
+                background: 'linear-gradient(135deg, #d0e68c 0%, #b6de3d 100%)',
+                borderRadius: 2,
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+            >
+              <Box sx={{ position: 'relative', zIndex: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <TrendingUpIcon sx={{ 
+                    fontSize: 40, 
+                    color: 'success.dark',
+                    mr: 1
+                  }} />
+                  <Typography variant="h6" color="success.dark">
+                    Total Earned
+                  </Typography>
+                </Box>
+                <Typography variant="h3" color="success.dark" sx={{ fontWeight: 'bold' }}>
+                  {rewardsData?.totalPointsEarned || 0}
+                </Typography>
+              </Box>
+              <Box sx={{
+                position: 'absolute',
+                right: -20,
+                bottom: -20,
+                width: '150px',
+                height: '150px',
+                borderRadius: '50%',
+                background: 'success.dark',
+                opacity: 0.1
+              }} />
+            </Paper>
+
+            {/* Total Redeemed Card */}
+            <Paper 
+              elevation={2}
+              sx={{ 
+                p: 3,
+                background: 'linear-gradient(135deg, #ffb74d 0%, #ff9800 100%)',
+                borderRadius: 2,
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+            >
+              <Box sx={{ position: 'relative', zIndex: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <ShoppingCartIcon sx={{ 
+                    fontSize: 40, 
+                    color: 'warning.dark',
+                    mr: 1
+                  }} />
+                  <Typography variant="h6" color="warning.dark">
+                    Total Redeemed
+                  </Typography>
+                </Box>
+                <Typography variant="h3" color="warning.dark" sx={{ fontWeight: 'bold' }}>
+                  {rewardsData?.totalPointsRedeemed || 0}
+                </Typography>
+              </Box>
+              <Box sx={{
+                position: 'absolute',
+                right: -20,
+                bottom: -20,
+                width: '150px',
+                height: '150px',
+                borderRadius: '50%',
+                background: 'warning.dark',
+                opacity: 0.1
+              }} />
+            </Paper>
           </Box>
-          <LinearProgress 
-            variant="determinate" 
-            value={(rewardsData?.totalPoints / 1000) * 100} 
-            color="success"
-            sx={{ height: 10, borderRadius: 5 }}
-          />
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-            Progress to next tier: {rewardsData?.totalPoints}/1000 points
-          </Typography>
+
+          {/* Progress Bar */}
+          <Box sx={{ mt: 4, mb: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Typography variant="body2" color="text.secondary">
+                Progress to next tier
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {rewardsData?.totalPoints}/1000 points
+              </Typography>
+            </Box>
+            <LinearProgress 
+              variant="determinate" 
+              value={(rewardsData?.totalPoints / 1000) * 100} 
+              color="success"
+              sx={{ 
+                height: 8, 
+                borderRadius: 4,
+                bgcolor: 'grey.100',
+                '& .MuiLinearProgress-bar': {
+                  borderRadius: 4
+                }
+              }}
+            />
+          </Box>
         </Box>
 
         <Divider sx={{ mb: 3 }} />
@@ -125,7 +252,7 @@ export default function RewardsComponent() {
                 <TableCell>Date</TableCell>
                 <TableCell>Activity</TableCell>
                 <TableCell align="right">Points</TableCell>
-                <TableCell>Type</TableCell>
+                <TableCell align="center">Status</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -138,14 +265,28 @@ export default function RewardsComponent() {
                     )}
                   </TableCell>
                   <TableCell>{entry.reward_description}</TableCell>
-                  <TableCell align="right">
+                  <TableCell 
+                    align="right"
+                    sx={{ 
+                      fontWeight: 'bold',
+                      color: entry.points_earned ? 'success.main' : 'warning.main'
+                    }}
+                  >
                     {entry.points_earned ? `+${entry.points_earned}` : `-${entry.points_redeemed}`}
                   </TableCell>
-                  <TableCell>
+                  <TableCell align="center">
                     <Chip
                       label={entry.points_earned ? 'Earned' : 'Redeemed'}
-                      color={entry.points_earned ? 'success' : 'primary'}
-                      size="small"
+                      color={entry.points_earned ? 'success' : 'warning'}
+                      sx={{
+                        minWidth: '100px',
+                        height: '32px',
+                        '& .MuiChip-label': {
+                          fontSize: '0.875rem',
+                          fontWeight: 'bold',
+                          px: 2
+                        }
+                      }}
                     />
                   </TableCell>
                 </TableRow>
@@ -153,6 +294,14 @@ export default function RewardsComponent() {
             </TableBody>
           </Table>
         </TableContainer>
+
+        {(!rewardsData?.history || rewardsData.history.length === 0) && (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography color="text.secondary">
+              No rewards history available
+            </Typography>
+          </Box>
+        )}
       </CardContent>
     </Card>
   );

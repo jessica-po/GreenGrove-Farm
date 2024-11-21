@@ -39,6 +39,7 @@ export const profileService = {
           lastname: data.last_name,
           email: data.email,
           phone: data.contact_number,
+          address: data.address,
           role: data.USERS?.role,
           dateCreated: new Date(data.created_at).toLocaleDateString(),
           dateUpdated: new Date(data.updated_at).toLocaleDateString(),
@@ -64,6 +65,7 @@ export const profileService = {
           last_name: userData.lastname,
           email: userData.email,
           contact_number: userData.phone,
+          address: userData.address,
           updated_at: new Date().toISOString(),
         })
         .eq('profile_id', profileId);
