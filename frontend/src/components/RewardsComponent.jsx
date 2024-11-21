@@ -15,10 +15,6 @@ import {
   Chip,
   LinearProgress,
 } from '@mui/material';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import StarIcon from '@mui/icons-material/Star';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { format } from 'date-fns';
 import { useUser } from '../hooks/useUser';
 import { rewardsService } from '../services/supabaseService';
@@ -84,7 +80,6 @@ export default function RewardsComponent() {
         p: 3
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <EmojiEventsIcon sx={{ mr: 1, color: 'success.main' }} />
           <Typography variant="h6">Sustainability Rewards</Typography>
         </Box>
 
@@ -112,12 +107,7 @@ export default function RewardsComponent() {
             >
               <Box sx={{ position: 'relative', zIndex: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <StarIcon sx={{ 
-                    fontSize: 40, 
-                    color: 'primary.main',
-                    opacity: 0.8,
-                    mr: 1
-                  }} />
+                  
                   <Typography variant="h6" color="text.secondary">
                     Available Points
                   </Typography>
@@ -151,11 +141,7 @@ export default function RewardsComponent() {
             >
               <Box sx={{ position: 'relative', zIndex: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <TrendingUpIcon sx={{ 
-                    fontSize: 40, 
-                    color: 'success.dark',
-                    mr: 1
-                  }} />
+                 
                   <Typography variant="h6" color="success.dark">
                     Total Earned
                   </Typography>
@@ -189,11 +175,7 @@ export default function RewardsComponent() {
             >
               <Box sx={{ position: 'relative', zIndex: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <ShoppingCartIcon sx={{ 
-                    fontSize: 40, 
-                    color: 'warning.dark',
-                    mr: 1
-                  }} />
+                  
                   <Typography variant="h6" color="warning.dark">
                     Total Redeemed
                   </Typography>
