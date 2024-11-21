@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -11,57 +11,127 @@ import {
   Snackbar,
   Alert,
   Divider,
+  FormControl,
+  RadioGroup,
+  Radio,
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import PropTypes from 'prop-types';
-
-// Prop type validation
-PersonalPreferences.propTypes = {
-  sx: PropTypes.oneOfType([
-    PropTypes.object,
-    PropTypes.func,
-  ]),
-};
-
-// Add default props
-PersonalPreferences.defaultProps = {
-  sx: {},
-};
-
-
-// Mock preferences data - replace with actual user preferences
-const initialPreferences = {
-  emailNotifications: true,
-  smsNotifications: false,
-  mailNotifications: false,
-  marketingEmails: true,
-  eventReminders: true,
-  newsletterSubscription: true,
-};
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import { profileService } from '../services/supabaseService';
+import { useUser } from '../hooks/useUser';
 
 export default function PersonalPreferences() {
-  const [preferences, setPreferences] = useState(initialPreferences);
+  const { selectedUserId } = useUser();
+  const [preferences, setPreferences] = useState({
+    emailNotifications: false,
+    smsNotifications: false,
+    pushNotifications: false,
+    marketingEmails: false,
+    eventReminders: false,
+    newsletterSubscription: false,
+    theme: 'light',
+  });
+  const [isLoading, setIsLoading] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
   const [snackbar, setSnackbar] = useState(null);
 
+  const fetchUserPreferences = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await profileService.fetchProfile(selectedUserId);
+      
+      if (error) throw error;
+
+      const notificationType = data.preferences?.notifications || 'none';
+      
+      setPreferences({
+        emailNotifications: notificationType === 'email',
+        smsNotifications: notificationType === 'sms',
+        pushNotifications: notificationType === 'push',
+        marketingEmails: data.preferences?.marketing_emails || false,
+        eventReminders: data.preferences?.event_reminders || false,
+        newsletterSubscription: data.preferences?.newsletter || false,
+        theme: data.preferences?.theme || 'light',
+      });
+    } catch (error) {
+      console.error('Error loading preferences:', error.message);
+      setSnackbar({ severity: 'error', message: 'Failed to load preferences' });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedUserId]);
+
+  useEffect(() => {
+    if (selectedUserId) {
+      fetchUserPreferences();
+    }
+  }, [selectedUserId, fetchUserPreferences]);
+
   const handleChange = (preference) => (event) => {
+    const newValue = event.target.checked;
+    
+    if (['emailNotifications', 'smsNotifications', 'pushNotifications'].includes(preference)) {
+      setPreferences(prev => ({
+        ...prev,
+        emailNotifications: preference === 'emailNotifications' ? newValue : false,
+        smsNotifications: preference === 'smsNotifications' ? newValue : false,
+        pushNotifications: preference === 'pushNotifications' ? newValue : false,
+      }));
+    } else {
+      setPreferences(prev => ({
+        ...prev,
+        [preference]: newValue
+      }));
+    }
+    setHasChanges(true);
+  };
+
+  const handleSave = async () => {
+    try {
+      setIsLoading(true);
+      
+      const notificationType = preferences.emailNotifications ? 'email' :
+                              preferences.smsNotifications ? 'sms' :
+                              preferences.pushNotifications ? 'push' : 'none';
+
+      const updatedPreferences = {
+        notifications: notificationType,
+        theme: preferences.theme,
+        marketing_emails: preferences.marketingEmails,
+        event_reminders: preferences.eventReminders,
+        newsletter: preferences.newsletterSubscription,
+      };
+
+      const { error } = await profileService.updatePreferences(selectedUserId, updatedPreferences);
+      
+      if (error) throw error;
+
+      setSnackbar({ severity: 'success', message: 'Preferences updated successfully!' });
+      setHasChanges(false);
+    } catch (error) {
+      console.error('Error updating preferences:', error.message);
+      setSnackbar({ severity: 'error', message: 'Failed to update preferences' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleThemeChange = (event) => {
     setPreferences(prev => ({
       ...prev,
-      [preference]: event.target.checked
+      theme: event.target.value
     }));
     setHasChanges(true);
   };
 
-  const handleSave = () => {
-    // Here you would typically save to your backend
-    setSnackbar({ severity: 'success', message: 'Preferences updated successfully!' });
-    setHasChanges(false);
-  };
-
   return (
     <Card sx={{ 
-      width: '75vw',
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column'
     }}>
       <CardContent sx={{ 
         flexGrow: 1,
@@ -74,7 +144,7 @@ export default function PersonalPreferences() {
           <NotificationsIcon sx={{ mr: 1, color: 'success.main' }} />
           <Typography variant="h6">Contact Preferences</Typography>
         </Box>
-        
+
         <Divider sx={{ mb: 2 }} />
 
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -92,6 +162,7 @@ export default function PersonalPreferences() {
                   checked={preferences.emailNotifications}
                   onChange={handleChange('emailNotifications')}
                   color="success"
+                  disabled={isLoading}
                 />
               }
               label="Email Notifications"
@@ -102,6 +173,7 @@ export default function PersonalPreferences() {
                   checked={preferences.smsNotifications}
                   onChange={handleChange('smsNotifications')}
                   color="success"
+                  disabled={isLoading}
                 />
               }
               label="SMS Notifications"
@@ -109,12 +181,13 @@ export default function PersonalPreferences() {
             <FormControlLabel
               control={
                 <Switch
-                  checked={preferences.mailNotifications}
-                  onChange={handleChange('mailNotifications')}
+                  checked={preferences.pushNotifications}
+                  onChange={handleChange('pushNotifications')}
                   color="success"
+                  disabled={isLoading}
                 />
               }
-              label="Mail Notifications"
+              label="Push Notifications"
             />
           </Box>
 
@@ -128,6 +201,7 @@ export default function PersonalPreferences() {
                   checked={preferences.marketingEmails}
                   onChange={handleChange('marketingEmails')}
                   color="success"
+                  disabled={isLoading}
                 />
               }
               label="Marketing Communications"
@@ -138,6 +212,7 @@ export default function PersonalPreferences() {
                   checked={preferences.eventReminders}
                   onChange={handleChange('eventReminders')}
                   color="success"
+                  disabled={isLoading}
                 />
               }
               label="Event Reminders"
@@ -148,10 +223,46 @@ export default function PersonalPreferences() {
                   checked={preferences.newsletterSubscription}
                   onChange={handleChange('newsletterSubscription')}
                   color="success"
+                  disabled={isLoading}
                 />
               }
               label="Newsletter Subscription"
             />
+          </Box>
+
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              Theme Preferences
+            </Typography>
+            <FormControl component="fieldset">
+              <RadioGroup
+                row
+                name="theme-options"
+                value={preferences.theme}
+                onChange={handleThemeChange}
+              >
+                <FormControlLabel
+                  value="light"
+                  control={<Radio color="success" disabled={isLoading} />}
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <LightModeIcon sx={{ mr: 1 }} />
+                      Light Mode
+                    </Box>
+                  }
+                />
+                <FormControlLabel
+                  value="dark"
+                  control={<Radio color="success" disabled={isLoading} />}
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <DarkModeIcon sx={{ mr: 1 }} />
+                      Dark Mode
+                    </Box>
+                  }
+                />
+              </RadioGroup>
+            </FormControl>
           </Box>
         </FormGroup>
 
@@ -161,7 +272,7 @@ export default function PersonalPreferences() {
             color="success"
             startIcon={<SaveIcon />}
             onClick={handleSave}
-            disabled={!hasChanges}
+            disabled={!hasChanges || isLoading}
           >
             Save Preferences
           </Button>

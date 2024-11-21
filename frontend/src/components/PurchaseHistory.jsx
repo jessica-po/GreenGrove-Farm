@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -19,9 +19,10 @@ import {
 } from '@mui/material';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import PropTypes from 'prop-types';
-import { supabase } from '../supabase';
+import { historyService } from '../services/supabaseService';
+import { useUser } from '../hooks/useUser';
 
-// Helper functions remain the same
+
 const formatDate = (dateString) => {
   const options = { 
     year: 'numeric', 
@@ -74,42 +75,35 @@ TabPanel.propTypes = {
 };
 
 export default function PurchaseHistory({ sx = {} }) {
+  const { selectedUserId } = useUser();
   const [tabValue, setTabValue] = useState(0);
   const [historyData, setHistoryData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchHistoryData();
-  }, []);
-
-  const fetchHistoryData = async () => {
+  const fetchHistoryData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const { data, error: supabaseError } = await supabase
-        .from('history_log')
-        .select(`
-          history_id,
-          user_id,
-          activity_type,
-          activity_description,
-          activity_date,
-          purchase_cost
-        `)
-        .order('activity_date', { ascending: false });
+      const { data, error: fetchError } = await historyService.fetchHistory(selectedUserId);
 
-      if (supabaseError) throw supabaseError;
+      if (fetchError) throw fetchError;
 
-      setHistoryData(data);
-    } catch (err) {
-      console.error('Error fetching history:', err);
+      setHistoryData(data || []);
+    } catch (error) {
+      console.error('Error fetching history:', error.message);
       setError('Failed to load history data');
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedUserId]);
+
+  useEffect(() => {
+    if (selectedUserId) {
+      fetchHistoryData();
+    }
+  }, [selectedUserId, fetchHistoryData]);
 
   // Filter data based on type
   const purchases = historyData.filter(item => 
@@ -133,8 +127,17 @@ export default function PurchaseHistory({ sx = {} }) {
   }
 
   return (
-    <Card sx={{ width: '100%', ...sx }}>
-      <CardContent>
+    <Card sx={{ 
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      ...sx 
+    }}>
+      <CardContent sx={{ 
+        flexGrow: 1,
+        p: 3 
+      }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <ShoppingBagIcon sx={{ mr: 1, color: 'success.main' }} />
           <Typography variant="h6">Purchase & Interaction History</Typography>

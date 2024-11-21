@@ -10,24 +10,14 @@ import {
     TableRow,
     Box,
     Chip,
+    CircularProgress,
+    Alert,
   } from '@mui/material';
 import HistoryIcon from '@mui/icons-material/History';
 import PropTypes from 'prop-types';
-import { useState, useEffect } from 'react';
-import { supabase } from '../supabase';
-
-
-// Add PropTypes
-ActivityLog.propTypes = {
-  sx: PropTypes.oneOfType([
-    PropTypes.object,
-    PropTypes.func,
-  ]),
-};
-
-ActivityLog.defaultProps = {
-  sx: {},
-};
+import { useState, useEffect, useCallback } from 'react';
+import { activityService } from '../services/supabaseService';
+import { useUser } from '../hooks/useUser';
 
 // Helper function to format dates
 const formatDate = (dateString) => {
@@ -41,7 +31,6 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', options);
 };
 
-// Helper function to get chip color based on activity type
 const getChipColor = (activityType) => {
   const colorMap = {
     'Feedback Submitted': 'info',
@@ -53,47 +42,59 @@ const getChipColor = (activityType) => {
   return colorMap[activityType] || 'default';
 };
 
-export default function ActivityLog() {
+export default function ActivityLog({ sx = {} }) {
+  const { selectedUserId } = useUser();
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchActivities();
-  }, []);
-
-  async function fetchActivities() {
+  const fetchActivities = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
       
-      const { data, error } = await supabase
-        .from('activity_log')
-        .select('*')
-        .order('activity_date', { ascending: false })
-        .limit(10);
+      const { data, error: fetchError } = await activityService.fetchActivities(selectedUserId);
 
-      if (error) {
-        throw error;
-      }
+      if (fetchError) throw fetchError;
 
-      setActivities(data);
+      setActivities(data || []);
     } catch (error) {
-      console.error('Error fetching activities:', error);
-      setError(error.message);
+      console.error('Error fetching activities:', error.message);
+      setError('Failed to load activity data');
     } finally {
       setLoading(false);
     }
+  }, [selectedUserId]);
+
+  useEffect(() => {
+    if (selectedUserId) {
+      fetchActivities();
+    }
+  }, [selectedUserId, fetchActivities]);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+    );
   }
 
   return (
-    <Card sx={{ width: '75vw' }}>
+    <Card sx={{ width: '75vw', ...sx }}>
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <HistoryIcon sx={{ mr: 1, color: 'success.main' }} />
           <Typography variant="h6">Recent Activity</Typography>
         </Box>
 
-        <TableContainer >
+        <TableContainer>
           <Table aria-label="activity log table">
             <TableHead>
               <TableRow>
@@ -129,3 +130,10 @@ export default function ActivityLog() {
     </Card>
   );
 }
+
+ActivityLog.propTypes = {
+  sx: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.func,
+  ]),
+};
