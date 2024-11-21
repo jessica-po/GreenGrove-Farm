@@ -20,12 +20,19 @@ import { useUser } from '../hooks/useUser';
 import { rewardsService } from '../services/supabaseService';
 import { RewardsSkeleton } from './LoadingSkeleton';
 
+/**
+ * Rewards component for displaying user rewards data
+ * @returns {JSX.Element} - Rendered Rewards component
+ * Improves user experience by displaying rewards data in a visually appealing way
+ */
+
 export default function RewardsComponent() {
   const { selectedUserId } = useUser();
   const [rewardsData, setRewardsData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Fetch rewards data for the selected user
   const fetchRewardsData = useCallback(async () => {
     try {
       setIsLoading(true);

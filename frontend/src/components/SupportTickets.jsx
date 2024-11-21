@@ -38,7 +38,7 @@ export default function SupportTickets({ isAdmin = false }) {
     search: '',
   });
 
-  // Define columns based on user role
+  // Define table columns based on user role
   const columns = [
     ...(isAdmin ? [{ id: 'userName', label: 'User', minWidth: 170 }] : []),
     { id: 'ticket_id', label: 'Ticket ID', minWidth: 100 },

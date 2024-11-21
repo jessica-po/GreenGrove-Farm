@@ -54,6 +54,8 @@ export default function ActivityLog({ isAdmin = false }) {
     'Integration Update'
   ];
 
+  // Fetch activities on component mount
+  // Fetch activities when selectedUserId changes
   useEffect(() => {
     const fetchActivities = async () => {
       setIsLoading(true);

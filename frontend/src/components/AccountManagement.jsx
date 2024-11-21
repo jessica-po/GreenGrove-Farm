@@ -32,7 +32,6 @@ import SupportTickets from './SupportTickets';
  * @param {number} props.value - Current active tab index
  * @param {number} props.index - This tab's index
  */
-
 const MemoizedTabPanel = memo(function TabPanel({ children, value, index }) {
   return (
     <Box
@@ -56,6 +55,8 @@ MemoizedTabPanel.propTypes = {
 /**
  * AccountManagement component handles user account features including
  * profile management, rewards, activity tracking, support tickets and purchase history
+ * admins will only see profile, activity and support tabs, but view that data for all users
+ * all others will see profile, rewards, purchases, activity and support tabs
  */
 export default function AccountManagement() {
     const { selectedUserId, userRole } = useUser();
@@ -64,6 +65,8 @@ export default function AccountManagement() {
     const [error, setError] = useState(null);
 
     // Define tabs based on user role
+    // useMemo memoizes the tabs array and prevent unnecessary re-renders
+    // ErrorBoundary component used to catch errors in child components
     const tabs = useMemo(() => {
       const baseTabs = [
         {
@@ -101,7 +104,7 @@ export default function AccountManagement() {
         }
       ];
 
-      // Add customer-specific tabs
+      // Add customer-specific tabs--won't display if the user is an admin
       if (userRole?.toLowerCase() !== 'admin') {
         baseTabs.push(
           {
@@ -131,13 +134,14 @@ export default function AccountManagement() {
     }, [userRole]); 
 
     // Handle tab changes
+    // useCallback memoizes the handleTabChange function and prevents unnecessary re-renders
     const handleTabChange = useCallback((event, newValue) => {
         if (newValue !== activeTab) {
             setActiveTab(newValue);
         }
     }, [activeTab]);
 
-    // Handle keyboard navigation
+    // Handle keyboard navigation for improved accessibility
     const handleKeyDown = useCallback((e) => {
       if (e.key === 'ArrowLeft') {
         setActiveTab(prev => Math.max(0, prev - 1));

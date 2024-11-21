@@ -1,16 +1,16 @@
 import { supabase } from './supabase';
 
 /**
- * supabaseService for interacting with Supabase
- * All services are exported from this file
+ * supabaseService for interacting with Supabase, like fetching user profiles, history, activities, etc.
+ * All services are exported from this file to use in the UI components.
  * Components should import these services to interact with Supabase, not the supabase client directly
  * Available services:
- * - profileService - for user profile data
- * - historyService - for purchase and interaction history
- * - activityService - for activity logs
- * - supportService - for support tickets
- * - rewardsService - for rewards history
- * - userService - for non-admin users
+ * - profileService - for fetching and updating user profile and preferences data
+ * - historyService - for fetching purchase and interaction history
+ * - activityService - for fetching activity logs
+ * - supportService - for fetching support tickets
+ * - rewardsService - for fetching rewards history
+ * - userService - to get non-admin users for user selection since there's no login portal
  */
 
 /**

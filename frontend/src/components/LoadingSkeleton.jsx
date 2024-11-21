@@ -4,6 +4,7 @@ import Grid from '@mui/material/Grid2';
 /**
  * ProfileSkeleton component for displaying a loading skeleton of a profile
  * @returns {JSX.Element} - Rendered ProfileSkeleton component
+ * Improves user experience by displaying a loading skeleton while waiting for profile data to load instead of a blank screen
  */
 
 export const ProfileSkeleton = () => {
