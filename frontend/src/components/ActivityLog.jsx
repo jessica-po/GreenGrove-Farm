@@ -13,6 +13,9 @@ import {
   } from '@mui/material';
 import HistoryIcon from '@mui/icons-material/History';
 import PropTypes from 'prop-types';
+import { useState, useEffect } from 'react';
+import { supabase } from '../supabase';
+
 
 // Add PropTypes
 ActivityLog.propTypes = {
@@ -25,40 +28,6 @@ ActivityLog.propTypes = {
 ActivityLog.defaultProps = {
   sx: {},
 };
-
-// Mock data for activity log
-const mockActivities = [
-  {
-    activity_id: 1,
-    activity_type: 'Feedback Submitted',
-    activity_description: 'Submitted feedback for Project X',
-    activity_date: '2024-03-15T10:30:00',
-  },
-  {
-    activity_id: 2,
-    activity_type: 'Support Ticket Opened',
-    activity_description: 'Opened ticket #1234 regarding login issues',
-    activity_date: '2024-03-14T15:45:00',
-  },
-  {
-    activity_id: 3,
-    activity_type: 'Profile Updated',
-    activity_description: 'Updated contact information',
-    activity_date: '2024-03-13T09:20:00',
-  },
-  {
-    activity_id: 4,
-    activity_type: 'Password Changed',
-    activity_description: 'Changed account password',
-    activity_date: '2024-03-12T16:15:00',
-  },
-  {
-    activity_id: 5,
-    activity_type: 'Login Attempt',
-    activity_description: 'Successful login from new device',
-    activity_date: '2024-03-11T11:30:00',
-  },
-];
 
 // Helper function to format dates
 const formatDate = (dateString) => {
@@ -85,6 +54,37 @@ const getChipColor = (activityType) => {
 };
 
 export default function ActivityLog() {
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchActivities();
+  }, []);
+
+  async function fetchActivities() {
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase
+        .from('activity_log')
+        .select('*')
+        .order('activity_date', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        throw error;
+      }
+
+      setActivities(data);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <Card sx={{ width: '75vw' }}>
       <CardContent>
@@ -103,7 +103,7 @@ export default function ActivityLog() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {mockActivities.map((activity) => (
+              {activities.map((activity) => (
                 <TableRow
                   key={activity.activity_id}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
