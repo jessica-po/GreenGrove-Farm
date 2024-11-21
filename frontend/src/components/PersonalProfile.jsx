@@ -14,29 +14,33 @@ import {
   DialogContent,
   DialogActions,
   CircularProgress,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import Grid from '@mui/material/Grid2';
 import { profileService } from '../services/supabaseService';
-import PeopleIcon from '@mui/icons-material/People';
 import { useUser } from '../hooks/useUser';
+import { validateEmail, validatePhone } from '../utils/validators';
+import ProfileSkeleton from '../components/LoadingSkeleton';
 
+/**
+ * PersonalProfile component for displaying and managing user profile information
+ * @returns {JSX.Element} - Rendered PersonalProfile component
+ */
 export default function PersonalProfile() {
-  const { selectedUserId, setSelectedUserId } = useUser();
+  const { selectedUserId } = useUser();
   const [userData, setUserData] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [tempData, setTempData] = useState(null);
   const [snackbar, setSnackbar] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [users, setUsers] = useState([]);
+  const [errors, setErrors] = useState({});
 
+  /**
+   * fetchUserProfile function to fetch user profile from SupabaseService
+   */
   const fetchUserProfile = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -54,23 +58,6 @@ export default function PersonalProfile() {
     }
   }, [selectedUserId]);
 
-  const fetchUsers = useCallback(async () => {
-    try {
-      const { data, error } = await profileService.fetchAllUsers();
-      
-      if (error) throw error;
-      
-      setUsers(data || []);
-    } catch (error) {
-      console.error('Error loading users:', error.message);
-      setSnackbar({ severity: 'error', message: 'Failed to load users' });
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
   useEffect(() => {
     if (selectedUserId) {
       fetchUserProfile();
@@ -87,8 +74,35 @@ export default function PersonalProfile() {
     setTempData(userData);
   };
 
+  /**
+   * validateForm function to validate the form data
+   * @returns {boolean} - Whether the form data is valid
+   */
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Required fields
+    if (!tempData?.firstname?.trim()) newErrors.firstname = 'First name is required';
+    if (!tempData?.lastname?.trim()) newErrors.lastname = 'Last name is required';
+    
+    // Email validation
+    if (!validateEmail(tempData?.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    // Phone validation
+    if (tempData?.phone && !validatePhone(tempData.phone)) {
+      newErrors.phone = 'Please enter a valid phone number';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSave = () => {
-    setOpenDialog(true);
+    if (validateForm()) {
+      setOpenDialog(true);
+    }
   };
 
   const handleConfirmSave = async () => {
@@ -114,14 +128,18 @@ export default function PersonalProfile() {
     setTempData({ ...tempData, [field]: event.target.value });
   };
 
-  const handleUserChange = (event) => {
-    setSelectedUserId(event.target.value);
-  };
+  if (isLoading) {
+    return (
+      <Card sx={{ width: '100%' }}>
+        <CardContent>
+          <ProfileSkeleton />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card sx={{ 
-      width: '75vw',
-    }}>
+    <Card sx={{ width: '100%' }}>
       <CardContent sx={{ 
         flexGrow: 1,
         display: 'flex',
@@ -138,24 +156,6 @@ export default function PersonalProfile() {
           <Typography variant="h6" component="h2">
             User Profile
           </Typography>
-          <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel id="user-select-label">Select User</InputLabel>
-            <Select
-              labelId="user-select-label"
-              value={selectedUserId}
-              onChange={handleUserChange}
-              label="Select User"
-              startAdornment={
-                <PeopleIcon sx={{ mr: 1, color: 'action.active' }} />
-              }
-            >
-              {users.map((user) => (
-                <MenuItem key={user.id} value={user.id}>
-                  {user.name} ({user.role})
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -197,16 +197,21 @@ export default function PersonalProfile() {
             spacing={2}
             columns={12}
           >
-            <Grid xs={6}>
+            <Grid xs={6} md={6}>
               <TextField
                 fullWidth
+                label="First Name"
                 value={tempData?.firstname}
                 onChange={handleChange('firstname')}
                 disabled={!editMode}
-                variant="outlined"
+                error={!!errors.firstname}
+                helperText={errors.firstname}
+                required
+                aria-label="First Name"
+                aria-required="true"
               />
             </Grid>
-            <Grid xs={6}>
+            <Grid xs={6} md={6}>
               <TextField
                 fullWidth
                 value={tempData?.lastname}
@@ -216,7 +221,7 @@ export default function PersonalProfile() {
               />
             </Grid>
 
-            <Grid xs={6}>
+            <Grid xs={6} md={6}>
               <TextField
                 fullWidth
                 value={tempData?.email}
@@ -225,7 +230,7 @@ export default function PersonalProfile() {
                 variant="outlined"
               />
             </Grid>
-            <Grid xs={6}>
+            <Grid xs={6} md={6}>
               <TextField
                 fullWidth
                 value={tempData?.phone}
@@ -235,7 +240,7 @@ export default function PersonalProfile() {
               />
             </Grid>
 
-            <Grid xs={12}>
+            <Grid xs={12} md={12}>
               <TextField
                 fullWidth
                 value={tempData?.address}

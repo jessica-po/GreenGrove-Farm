@@ -1,13 +1,30 @@
 import { supabase } from './supabase';
 
+/**
+ * supabaseService for interacting with Supabase
+ * All services are exported from this file
+ * Components should import these services to interact with Supabase, not the supabase client directly
+ * Available services:
+ * - profileService - for user profile data
+ * - historyService - for purchase and interaction history
+ * - activityService - for activity logs
+ * - supportService - for support tickets
+ * - rewardsService - for rewards history
+ * - userService - for non-admin users
+ */
+
+/**
+ * profileService for interacting with user profiles in Supabase
+ */
 export const profileService = {
   async fetchProfile(profileId) {
     try {
+      // Fetch single user profile data from Supabase
       const { data, error } = await supabase
         .from('user_profile')
         .select(`
           *,
-          users:user_id (
+          USERS (
             role
           )
         `)
@@ -22,7 +39,7 @@ export const profileService = {
           lastname: data.last_name,
           email: data.email,
           phone: data.contact_number,
-          role: data.users.role,
+          role: data.USERS?.role,
           dateCreated: new Date(data.created_at).toLocaleDateString(),
           dateUpdated: new Date(data.updated_at).toLocaleDateString(),
           preferences: data.preferences,
@@ -35,6 +52,9 @@ export const profileService = {
     }
   },
 
+  /**
+   * updateProfile function to update user profile data in Supabase
+   */
   async updateProfile(profileId, userData) {
     try {
       const { error } = await supabase
@@ -57,6 +77,9 @@ export const profileService = {
     }
   },
 
+  /**
+   * updatePreferences function to update user preferences in Supabase
+   */
   async updatePreferences(profileId, preferences) {
     try {
       const { error } = await supabase
@@ -76,6 +99,9 @@ export const profileService = {
     }
   },
 
+  /**
+   * fetchAllUsers function to fetch all users from Supabase
+   */
   async fetchAllUsers() {
     try {
       const { data, error } = await supabase
@@ -84,7 +110,7 @@ export const profileService = {
           profile_id,
           first_name,
           last_name,
-          users:user_id (
+          USERS:user_id (
             role
           )
         `)
@@ -96,7 +122,7 @@ export const profileService = {
         data: data.map(user => ({
           id: user.profile_id,
           name: `${user.first_name} ${user.last_name}`,
-          role: user.users.role
+          role: user.USERS.role
         })),
         error: null
       };
@@ -108,6 +134,9 @@ export const profileService = {
 };
 
 export const historyService = {
+  /**
+   * fetchHistory function to fetch history from Supabase
+   */
   async fetchHistory(userId) {
     try {
       if (!userId) {
@@ -138,60 +167,106 @@ export const historyService = {
 };
 
 export const activityService = {
-  async fetchActivities(userId) {
+  /**
+   * fetchActivities function to fetch activities from Supabase
+   */
+  async fetchActivities(userId, isAdmin = false) {
     try {
-      if (!userId) {
-        throw new Error('User ID is required');
+      if (!isAdmin && !userId) {
+        throw new Error('User ID is required for non-admin users');
       }
 
-      const { data, error } = await supabase
+      // Build the activity query
+      let query = supabase
         .from('activity_log')
-        .select(`
-          activity_id,
-          user_id,
-          activity_type,
-          activity_description,
-          activity_date
-        `)
-        .eq('user_id', userId)
-        .order('activity_date', { ascending: false })
-        .limit(10);
+        .select('*')
+        .order('activity_date', { ascending: false });
 
-      if (error) throw error;
+      // Only filter by user_id if NOT an admin
+      if (!isAdmin) {
+        query = query.eq('user_id', userId);
+      }
 
-      return { data, error: null };
+      const { data: activityData, error: activityError } = await query;
+
+      if (activityError) throw activityError;
+
+      // Get user profiles for mapping names
+      const { data: profileData, error: profileError } = await supabase
+        .from('user_profile')
+        .select('user_id, first_name, last_name');
+
+      if (profileError) throw profileError;
+
+      // Create a map of user profiles for quick lookup
+      const userProfileMap = profileData.reduce((acc, profile) => {
+        acc[profile.user_id] = profile;
+        return acc;
+      }, {});
+
+      // Transform the data
+      const transformedData = activityData.map(activity => ({
+        activity_id: activity.activity_id,
+        user_id: activity.user_id,
+        activity_type: activity.activity_type,
+        activity_description: activity.activity_description,
+        activity_date: new Date(activity.activity_date).toLocaleString(),
+        userName: userProfileMap[activity.user_id] 
+          ? `${userProfileMap[activity.user_id].first_name} ${userProfileMap[activity.user_id].last_name}`
+          : `User ${activity.user_id}`
+      }));
+
+      return { data: transformedData, error: null };
     } catch (error) {
       console.error('Error fetching activities:', error);
-      return { data: null, error };
+      return { 
+        data: [], 
+        error: {
+          message: 'Failed to fetch activities',
+          details: error
+        }
+      };
     }
   }
 };
 
 export const supportService = {
-  async fetchTickets(userId) {
+  /**
+   * fetchTickets function to fetch tickets from Supabase
+   */
+  async fetchTickets(userId, isAdmin = false) {
     try {
-      if (!userId) {
-        throw new Error('User ID is required');
+      if (!isAdmin && !userId) {
+        throw new Error('User ID is required for non-admin users');
       }
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('support_tickets')
         .select(`
-          ticket_id,
-          user_id,
-          subject,
-          description,
-          status,
-          priority,
-          created_at,
-          updated_at
+          *,
+          user_profile!support_tickets_user_id_fkey (
+            first_name,
+            last_name
+          )
         `)
-        .eq('user_id', userId)
         .order('created_at', { ascending: false });
+
+      if (!isAdmin) {
+        query = query.eq('user_id', userId);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
-      return { data, error: null };
+      const transformedData = data.map(ticket => ({
+        ...ticket,
+        userName: ticket.user_profile 
+          ? `${ticket.user_profile.first_name} ${ticket.user_profile.last_name}`
+          : `User ${ticket.user_id}`
+      }));
+
+      return { data: transformedData, error: null };
     } catch (error) {
       console.error('Error fetching tickets:', error);
       return { data: null, error };
@@ -200,6 +275,9 @@ export const supportService = {
 };
 
 export const rewardsService = {
+  /**
+   * fetchRewards function to fetch rewards from Supabase
+   */
   async fetchRewards(userId) {
     try {
       const { data, error } = await supabase
@@ -226,6 +304,42 @@ export const rewardsService = {
       };
     } catch (error) {
       console.error('Error fetching rewards:', error);
+      return { data: null, error };
+    }
+  }
+};
+
+export const userService = {
+  /**
+   * fetchNonAdminUsers function to fetch non-admin users from Supabase
+   */
+  async fetchNonAdminUsers() {
+    try {
+      const { data, error } = await supabase
+        .from('user_profile')
+        .select(`
+          user_id,
+          first_name,
+          last_name,
+          USERS (
+            role
+          )
+        `)
+        .neq('USERS.role', 'admin')
+        .order('first_name');
+
+      if (error) throw error;
+
+      const transformedData = data.map(user => ({
+        user_id: user.user_id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        role: user.USERS?.role
+      }));
+
+      return { data: transformedData, error: null };
+    } catch (error) {
+      console.error('Error fetching users:', error);
       return { data: null, error };
     }
   }

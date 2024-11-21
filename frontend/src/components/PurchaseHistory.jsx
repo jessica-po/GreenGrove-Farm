@@ -22,7 +22,11 @@ import PropTypes from 'prop-types';
 import { historyService } from '../services/supabaseService';
 import { useUser } from '../hooks/useUser';
 
-
+/**
+ * formatDate function to format date strings
+ * @param {string} dateString - The date string to format
+ * @returns {string} - The formatted date string
+ */
 const formatDate = (dateString) => {
   const options = { 
     year: 'numeric', 
@@ -34,10 +38,20 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', options);
 };
 
+/**
+ * formatPrice function to format price strings
+ * @param {string} price - The price string to format
+ * @returns {string} - The formatted price string
+ */
 const formatPrice = (price) => {
   return `$${parseFloat(price).toFixed(2)}`;
 };
 
+/**
+ * getStatusColor function to get the color for a given type
+ * @param {string} type - The type to get the color for
+ * @returns {string} - The color for the given type
+ */
 const getStatusColor = (type) => {
   const colorMap = {
     'purchase': 'success',
@@ -48,6 +62,13 @@ const getStatusColor = (type) => {
   return colorMap[type.toLowerCase()] || 'default';
 };
 
+/**
+ * TabPanel component for managing content visibility in tabs
+ * @param {Object} props - Component props
+ * @param {ReactNode} props.children - Tab content
+ * @param {number} props.value - Current active tab index
+ * @param {number} props.index - This tab's index
+ */
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -74,6 +95,11 @@ TabPanel.propTypes = {
   value: PropTypes.number.isRequired,
 };
 
+/**
+ * PurchaseHistory component for displaying purchase and interaction history
+ * @param {Object} props - Component props
+ * @param {Object} props.sx - Styling props
+ */
 export default function PurchaseHistory({ sx = {} }) {
   const { selectedUserId } = useUser();
   const [tabValue, setTabValue] = useState(0);

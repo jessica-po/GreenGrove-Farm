@@ -5,7 +5,6 @@ import {
   Typography,
   Box,
   Divider,
-  CircularProgress,
   Table,
   TableBody,
   TableCell,
@@ -20,6 +19,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { format } from 'date-fns';
 import { useUser } from '../hooks/useUser';
 import { rewardsService } from '../services/supabaseService';
+import { RewardsSkeleton } from './LoadingSkeleton';
 
 export default function RewardsComponent() {
   const { selectedUserId } = useUser();
@@ -53,9 +53,11 @@ export default function RewardsComponent() {
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-        <CircularProgress color="success" />
-      </Box>
+      <Card sx={{ width: '100%' }}>
+        <CardContent>
+          <RewardsSkeleton />
+        </CardContent>
+      </Card>
     );
   }
 

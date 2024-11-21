@@ -22,6 +22,11 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { profileService } from '../services/supabaseService';
 import { useUser } from '../hooks/useUser';
 
+/**
+ * PersonalPreferences component for managing user preferences
+ * @returns {JSX.Element} - Rendered PersonalPreferences component
+ */
+
 export default function PersonalPreferences() {
   const { selectedUserId } = useUser();
   const [preferences, setPreferences] = useState({
@@ -37,6 +42,9 @@ export default function PersonalPreferences() {
   const [hasChanges, setHasChanges] = useState(false);
   const [snackbar, setSnackbar] = useState(null);
 
+  /**
+   * fetchUserPreferences function to fetch user preferences from SupabaseService
+   */
   const fetchUserPreferences = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -63,12 +71,20 @@ export default function PersonalPreferences() {
     }
   }, [selectedUserId]);
 
+  /**
+   * useEffect hook to fetch user preferences when the selectedUserId changes
+   */
   useEffect(() => {
     if (selectedUserId) {
       fetchUserPreferences();
     }
   }, [selectedUserId, fetchUserPreferences]);
 
+  /**
+   * handleChange function to handle preference changes
+   * @param {string} preference - The preference to change
+   * @returns {function} - The event handler for the preference change
+   */
   const handleChange = (preference) => (event) => {
     const newValue = event.target.checked;
     
@@ -88,6 +104,9 @@ export default function PersonalPreferences() {
     setHasChanges(true);
   };
 
+  /**
+   * handleSave function to save user preferences
+   */
   const handleSave = async () => {
     try {
       setIsLoading(true);
@@ -118,6 +137,10 @@ export default function PersonalPreferences() {
     }
   };
 
+  /**
+   * handleThemeChange function to handle theme changes
+   * @param {Event} event - The event object
+   */
   const handleThemeChange = (event) => {
     setPreferences(prev => ({
       ...prev,
