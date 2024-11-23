@@ -1,0 +1,46 @@
+Dummy Data for User Table: 
+INSERT INTO USER (user_id, email, password_hash, role, status, email_verfied, created_at, updated_at) VALUES
+(1, 'admin@gmail.com', 'hashed_password_1', 'Admin', 'Active', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(2, 'retailer@yahoo.com', 'hashed_password_2', 'Retailer', 'Active', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(3, 'customer@gmail.com', 'hashed_password_3', 'Customer', 'Inactive', FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(4, 'partner@gmail.com', 'hashed_password_4', 'Partner', 'Active', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(5, 'ouradmin@yahoo.com', 'hashed_password_5', 'Admin', 'Active', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(6, 'verynewretailer@outlook.com', 'hashed_password_6', 'Retailer', Inactive, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(7, 'firsttimecustomer@gmail.com', 'hashed_password_7', 'Customer', Active, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+(8, 'originalpartner@outlook.com', 'hashed_password_8', 'Partner', Inactive, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+Dummy Data for User_Profile Table: 
+
+INSERT INTO USER_PROFILE (profile_id, user_id, first_name, last_name, contact_number, preferences, created_at, updated_at, email, password_hash) VALUES
+(1, 1, 'John', Doe, '123-456-7890', '{"theme": "dark", "notifications": "email"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'admin@gmail.com', 'hashed_password_1'),
+(2, 2, ‘Josh’, 'Banks', '234-567-8901', '{"theme": "light", "notifications": "sms"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'retailer@yahoo.com', 'hashed_password_2'),
+(3, 3, 'Olivia', 'Smith', '345-678-9012', '{"theme": "dark", "notifications": "none"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'customer@gmail.com', 'hashed_password_3'),
+(4, 4, 'Forest', 'O’Conner', '456-789-0123', '{"theme": "light", "notifications": "push"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'partner@gmail.com', 'hashed_password_4'),
+(5, 5, 'Ben', Stevenson, '482-483-2495', '{"theme": "dark", "notifications": "email"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'ouradmin@yahoo.com', 'hashed_password_5'),
+(6, 6, ‘Elena’, Damon, '830-238-3820', '{"theme": "light", "notifications": "sms"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'verynewretailer@outlook.com', 'hashed_password_6'),
+(7, 7, 'Anastasia', 'Crow', '293-318-3174', '{"theme": "dark", "notifications": "none"}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'firsttimecustomer@gmail.com', 'hashed_password_7'),
+
+
+Dummy Data for Activity_Log Table: 
+INSERT INTO ACTIVITY_LOG (activity_id, user_id, activity_type, activity_description, activity_date) VALUES
+(1, 1, 'Login', 'Admin logged into the system', CURRENT_TIMESTAMP),
+(2, 2, 'Profile Update', 'Retailer updated contact number', CURRENT_TIMESTAMP),
+(3, 3, 'Logout', 'Customer logged into the system', CURRENT_TIMESTAMP),
+(4, 4, 'Password Change', 'Partner changed their password', CURRENT_TIMESTAMP),
+(5, 5, 'Profile Update', Admin updated contact number', CURRENT_TIMESTAMP),
+(6, 6, 'Login', 'Admin logged into the system', CURRENT_TIMESTAMP),
+(7, 7, 'Profile Update', 'Retailer updated contact number', CURRENT_TIMESTAMP),
+(8, 8, 'Logout', 'Customer logged into the system', CURRENT_TIMESTAMP);
+
+Dummy Data for History_Log Table: 
+INSERT INTO HISTORY_LOG (history_id, user_id, activity_type, activity_description, activity_date, purchase_cost) VALUES
+(1, 1, 'Purchase', 'Admin made a purchase', CURRENT_TIMESTAMP, 150.00),
+(2, 2, 'Purchase', 'Retailer bought new stock for their store', CURRENT_TIMESTAMP, 2000.00),
+(3, 3, 'Purchase', 'Customer bought a new item, CURRENT_TIMESTAMP, 499.99),
+(4, 4, 'Purchase', 'Partner made a purchase’, CURRENT_TIMESTAMP, 850.00),
+(5, 5, 'Refund', 'Admin requested a refund for a purchase', CURRENT_TIMESTAMP, 0.00),
+(6, 6, 'Purchase', 'Retailer bought a new item, CURRENT_TIMESTAMP, 650.99),
+(7, 7, 'Purchase', ‘Customer made a purchase’, CURRENT_TIMESTAMP, 199.99),
+(8, 8, 'Refund', 'Partner requested a refund for a purchase', CURRENT_TIMESTAMP, 0.00);
+
+
