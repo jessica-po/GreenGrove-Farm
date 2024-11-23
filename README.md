@@ -33,6 +33,7 @@ Before you begin, ensure you have installed:
     ```bash
     cd frontend
     npm install
+    #may need to use npm install @supabase/supabase-js
     ```
 
 1. If working on the backend, navigate to the `backend` directory and install dependencies:
