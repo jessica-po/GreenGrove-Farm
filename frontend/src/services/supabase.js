@@ -8,6 +8,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 /**
- * supabase client for interacting with Supabase
+ * supabase client for interacting with Supabase 
+ * make sure you have .env file with your supabaseURL and supabaseAnonKey to be able to access the database
+ * and successfully have different clients and keep their information accurate and secure
  */
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
