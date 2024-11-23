@@ -1,0 +1,69 @@
+/*retrieve all active users with their profiles*/
+SELECT 
+    U.user_id, 
+    U.email, 
+    U.role, 
+    U.status, 
+    UP.first_name, 
+    UP.last_name, 
+    UP.contact_number
+FROM 
+    USER U
+JOIN 
+    USER_PROFILE UP ON U.user_id = UP.user_id
+WHERE 
+    U.status = 'Active';
+
+/*count number of activities per user*/
+SELECT 
+    U.user_id, 
+    U.email, 
+    COUNT(AL.activity_id) AS activity_count
+FROM 
+    USER U
+LEFT JOIN 
+    ACTIVITY_LOG AL ON U.user_id = AL.user_id
+GROUP BY 
+    U.user_id, U.email
+ORDER BY 
+    activity_count DESC;
+
+/*retrieve all purchases with costs greater than $500*/
+SELECT 
+    HL.history_id, 
+    HL.user_id, 
+    HL.activity_type, 
+    HL.activity_description, 
+    HL.purchase_cost, 
+    HL.activity_date
+FROM 
+    HISTORY_LOG HL
+WHERE 
+    HL.purchase_cost > 500
+ORDER BY 
+    HL.purchase_cost DESC;
+
+/*get a summary of user roles and their count*/
+SELECT 
+    role, 
+    COUNT(*) AS role_count
+FROM 
+    USER
+GROUP BY 
+    role
+ORDER BY 
+    role_count DESC;
+
+/*retrieve users with unverified emails*/
+SELECT 
+    U.user_id, 
+    U.email, 
+    U.status, 
+    UP.first_name, 
+    UP.last_name
+FROM 
+    USER U
+LEFT JOIN 
+    USER_PROFILE UP ON U.user_id = UP.user_id
+WHERE 
+    U.email_verfied = FALSE;
