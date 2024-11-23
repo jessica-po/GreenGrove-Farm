@@ -1,0 +1,68 @@
+CREATE TABLE USER(
+    user_id INT,
+    PRIMARY KEY(user_id),
+    email VARCHAR2(255) UNIQUE NOT NULL,
+    password_hash VARCHAR2(255) UNIQUE NOT NULL,
+    role VARCHAR2(20) CHECK( role in ('Admin', 'Retailer', 'Customer', 'Partner')) NOT NULL,
+    status VARCHAR2(20) DEFAULT 'Active' CHECK( status in ('Active', 'Inactive')),
+    email_verfied BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP    
+);
+
+CREATE SEQUENCE user_seq_id
+START WITH 0
+INCREMENT BY 1
+MINVALUE 0;
+
+CREATE TABLE USER_PROFILE(
+    profile_id INT,
+    PRIMARY KEY(profile_id),
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES USER(user_id),
+    first_name VARCHAR2(100) NOT NULL,
+    last_name VARCHAR2(100) NOT NULL,
+    contact_number VARCHAR2(20),
+    preferences JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    email VARCHAR2(255) UNIQUE NOT NULL,
+    password_hash VARCHAR2(255) UNIQUE NOT NULL
+);
+
+CREATE SEQUENCE profile_seq_id
+START WITH 0
+INCREMENT BY 1
+MINVALUE 0;
+
+CREATE TABLE ACTIVITY_LOG(
+    activity_id INT,
+    PRIMARY KEY(activity_id),
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES USER(user_id),
+    activity_type VARCHAR2(100) NOT NULL,
+    activity_description VARCHAR2(400) NOT NULL,
+    activity_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE SEQUENCE activity_seq_id
+START WITH 0
+INCREMENT BY 1
+MINVALUE 0;
+
+CREATE TABLE HISTORY_LOG(
+    history_id INT,
+    PRIMARY KEY(history_id),
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES USER(user_id),
+    activity_type VARCHAR2(100) NOT NULL,
+    activity_description VARCHAR2(400) NOT NULL,
+    activity_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    purchase_cost NUMBER(10, 2) DEFAULT 0
+);
+
+CREATE SEQUENCE history_seq_id
+START WITH 0
+INCREMENT BY 1
+MINVALUE 0;
+
