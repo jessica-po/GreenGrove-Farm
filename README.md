@@ -25,7 +25,7 @@ Before you begin, ensure you have installed:
 1. Clone the repository
 
     ```bash
-    git clone https://github.com/mcruz90/cps714.git
+    https://github.com/jessica-po/GreenGrove-Farm.git
     ```
 
 1. Navigate to the frontend directory and install dependencies:
